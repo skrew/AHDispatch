@@ -4,7 +4,6 @@ AHDispatch
 AHDispatch provides queue throttling functionality for [Grand Central Dispatch](https://developer.apple.com/library/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/Reference/reference.html).
 
 ## Overview
-===
 
 `AHDispatch` consists of a number of interfaces similar to GCD that can be used to create throttled serial queues and dispatch asynchronous and syncronous block tasks to them. 
 
