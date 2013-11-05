@@ -27,6 +27,7 @@
 
 #import <mach/mach.h>
 #import <mach/mach_time.h>
+#import <dispatch/time.h>
 
 static void * kThrottleTimeKey = &kThrottleTimeKey;
 static void * kThrottleMonitorKey = &kThrottleMonitorKey;
@@ -35,20 +36,25 @@ static void * kThrottleMutabilityKey = &kThrottleMutabilityKey;
 #define AH_NSEC_PER_SEC	1000000000ull	/* nanoseconds per second */
 
 
+// any functions that don't begin with "ah_", are private
+
+// worker blocks are timed during execution, so we can determine the throttle
+// time for concurrent monitoring
 uint64_t timed_execution(void (^block)(void))
 {
     uint64_t elapsedNanos = 0;
-    static mach_timebase_info_data_t sTimebaseInfo;;
+    static mach_timebase_info_data_t sTimebaseInfo;
 
-    uint64_t before = mach_absolute_time();
-
+    dispatch_time_t before = dispatch_time(DISPATCH_TIME_NOW, 0);
     block();
+    dispatch_time_t after = dispatch_time(DISPATCH_TIME_NOW, 0);
     
-    uint64_t after = mach_absolute_time();
     uint64_t elapsed = after - before;
     
     // Convert to nanoseconds.
-    
+    // Taken from Apple example code:
+    // https://developer.apple.com/library/mac/qa/qa1398/_index.html
+    //
     // If this is the first time we've run, get the timebase.
     // We can use denom == 0 to indicate that sTimebaseInfo is
     // uninitialised because it makes no sense to have a zero
@@ -61,43 +67,15 @@ uint64_t timed_execution(void (^block)(void))
     // Do the maths. We hope that the multiplication doesn't
     // overflow; the price you pay for working in fixed point.
     elapsedNanos = elapsed * sTimebaseInfo.numer / sTimebaseInfo.denom;
-    
+
     return elapsedNanos;
 }
 
-/*
-void set_context_value(dispatch_queue_t queue, void *value, NSString *key)
-{
-    __strong NSMutableDictionary *context = nil;
-    
-    // ensure the queue contains a valid context object
-    context = (__bridge NSMutableDictionary *)(dispatch_get_context(queue));
-    
-    if (!context || ![context isKindOfClass:[NSMutableDictionary class]]) {
-        // create a context for the queue
-        context = [NSMutableDictionary dictionaryWithCapacity:1];
-        dispatch_set_context(queue, (void *)CFBridgingRetain(context));
-    }
-
-    [context setObject:(__bridge id)value forKey:key];
-}
-
-void * get_context_value(dispatch_queue_t queue, NSString *key)
-{
-    __strong NSMutableDictionary *dictionary = (__bridge  NSMutableDictionary *)(dispatch_get_context(queue));
-    
-    if (dictionary == nil) return NULL;
-    
-    return (__bridge void *)[dictionary objectForKey:key];
-}
-*/
-
-typedef void (^MutableThrottleHandler)(dispatch_queue_t queue);
 
 // a reusable block that waits the specified number of nanoseconds before completing
-typedef void (^ThrottleHandler)(uint64_t nanoseconds, dispatch_queue_t queue);
+typedef void (^ThrottleHandler)(uint64_t nanoseconds);
 
-static ThrottleHandler const throttle = ^(uint64_t nanoseconds, dispatch_queue_t queue) {
+static ThrottleHandler const throttle = ^(uint64_t nanoseconds) {
 
 #ifdef DEBUG
     printf("%g sec throttle started.\n", nanoseconds * 1.0f / AH_NSEC_PER_SEC );
@@ -134,7 +112,6 @@ dispatch_queue_t ah_throttle_queue_new(void)
                                                       nanoseconds,
                                                       AH_THROTTLE_MUTABILITY_ALL,
                                                       AH_THROTTLE_MONITOR_CONCURRENT);
-    
     return queue;
 }
 
@@ -168,15 +145,6 @@ uint64_t ah_throttle_queue_get_time(dispatch_queue_t queue)
     return nanoseconds;
 }
 
-/* changing the mutablity behavior should not be allowed, after queue creation
-void ah_throttle_queue_set_mutability(dispatch_queue_t queue, AHDispatchThrottleMutability mutability)
-{
-    if (queue == NULL) return;
-    
-    __strong NSValue *value = @(mutability);
-    set_context_value(queue, (__bridge void *)value, kThrottleMutabilityKey);
-}
-*/
 
 ah_throttle_mutability_t ah_throttle_queue_get_mutability(dispatch_queue_t queue)
 {
@@ -198,6 +166,35 @@ ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue)
 
 #pragma mark - Queuing Tasks for Throttled Dispatch
 
+void throttle_dispatch(dispatch_block_t block, uint64_t nanoseconds)
+{
+    // lets see how long the working block takes to execute...
+    uint64_t executionNanos = timed_execution(^{
+        block();
+    });
+    
+    // now lets determine if we need to throttle execution...
+    ah_throttle_monitor_t monitor = (ah_throttle_monitor_t) dispatch_get_specific(kThrottleMonitorKey);
+    
+    // a concurrent monitor will dispatch a throttle block to fill the
+    // remaining time if a working block completes execution before the
+    // queue throttle time has elapsed
+    //
+    if (AH_THROTTLE_MONITOR_CONCURRENT == monitor) {
+        int64_t throttleNanos = nanoseconds - executionNanos;
+        if (throttleNanos > 0) {
+            throttle(throttleNanos);
+        }
+    }
+    else {  // AH_THROTTLE_MONITOR_SERIAL == monitor
+        // a serial monitor ignores working block execution time and simply
+        // throttles using the the user specified queue throttle time
+        if (nanoseconds > 0) {
+            throttle(nanoseconds);
+        }
+    }
+}
+
 void ah_throttle_async(dispatch_queue_t queue, dispatch_block_t block)
 {
     if (queue == NULL || block == NULL) {
@@ -205,37 +202,10 @@ void ah_throttle_async(dispatch_queue_t queue, dispatch_block_t block)
     }
     
     dispatch_async(queue, ^{
-        
         @synchronized(queue) {
-
-            // lets see how long the working block takes to execute...
-            uint64_t executionNanos = timed_execution(^{
-                block();
-            });
             
-            // now lets determine if we need to throttle execution...
-            uint64_t queueNanos = (uint64_t)dispatch_queue_get_specific(queue, kThrottleTimeKey);
-            ah_throttle_monitor_t monitor = (ah_throttle_monitor_t) dispatch_queue_get_specific(queue, kThrottleMonitorKey);
-            
-            // a concurrent monitor will dispatch a throttle block to fill the
-            // remaining time if a working block completes execution before the
-            // queue throttle time has elapsed
-            if (AH_THROTTLE_MONITOR_CONCURRENT == monitor) {
-                int64_t throttleNanos = queueNanos - executionNanos;
-                if (throttleNanos > 0) {
-                    throttle(throttleNanos, queue);
-                }
-            }
-            else { // AH_THROTTLE_MONITOR_SERIAL == monitor
-                // a serial monitor ignores working block execution time and simply
-                // throttles using the the user specified queue throttle time
-                if (queueNanos > 0) {
-                    throttle(queueNanos, queue);
-                }
-            }
-        
+            throttle_dispatch(block, (uint64_t) dispatch_get_specific(kThrottleTimeKey));
         }
-
     });
 }
 
@@ -248,11 +218,8 @@ void ah_throttle_after_async(uint64_t nanoseconds, dispatch_queue_t queue, dispa
     
     dispatch_async(queue, ^{
        @synchronized(queue) {
-            block();
            
-            if (nanoseconds > 0) {
-                throttle(nanoseconds, queue);
-            }
+           throttle_dispatch(block, nanoseconds);
        }
     });
 
@@ -268,13 +235,7 @@ void ah_throttle_sync(dispatch_queue_t queue, dispatch_block_t block)
     dispatch_sync(queue, ^{
         @synchronized(queue) {
 
-            block();
-            uint64_t nanoseconds = 0;
-            nanoseconds = (uint64_t) dispatch_queue_get_specific(queue, kThrottleTimeKey);
-            
-            if (nanoseconds > 0) {
-                throttle(nanoseconds, queue);
-            }
+            throttle_dispatch(block, (uint64_t) dispatch_get_specific(kThrottleTimeKey));
         }
     });
 }
@@ -289,11 +250,7 @@ void ah_throttle_after_sync(uint64_t nanoseconds, dispatch_queue_t queue, dispat
     dispatch_sync(queue, ^{
         @synchronized(queue) {
             
-            block();
-            
-            if (nanoseconds > 0) {
-                throttle(nanoseconds, queue);
-            }
+            throttle_dispatch(block, nanoseconds);
         }
     });
 }
