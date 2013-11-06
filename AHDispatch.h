@@ -68,13 +68,13 @@ dispatch_queue_t ah_throttle_queue_new(void);
  *  Takes a time interval in nanoseconds by which to delay the next task. Use the time multiplier constant `NSEC_PER_SEC` to help construst units of time expressed as seconds. For E.G. 3 seconds can be expressed as (3 * NSEC_PER_SEC).
  *
  *  @param label       A string label to identify this queue by. This parameter is optional and can be NULL.
- *  @param nanoseconds The number of nanoseconds by which to throttle tasks.
+ *  @param seconds    A double value representing th number of seconds by which to throttle tasks.
  *  @param mutability A `ah_throttle_mutability_t` value to apply to the given queue.
  *
  *  @return A `dispatch_queue_t` type with the specified throttle time.
  */
 dispatch_queue_t ah_throttle_queue_create(const char *label,
-                                          uint64_t nanoseconds,
+                                          double seconds,
                                           ah_throttle_mutability_t mutability,
                                           ah_throttle_monitor_t monitor);
 
@@ -82,18 +82,18 @@ dispatch_queue_t ah_throttle_queue_create(const char *label,
  *  Adds the specified throttle time to the given dispatch queue
  *
  *  @param queue       The dispatch queue to throttle. This parameter can not be NULL.
- *  @param nanoseconds The number of nanoseconds by which to throttle the queue after completion of each block.
+ *  @param seconds     The number of seconds by which to throttle the queue after completion of each block.
  */
-void ah_throttle_queue(dispatch_queue_t queue, uint64_t nanoseconds);
+void ah_throttle_queue(dispatch_queue_t queue, double seconds);
 
 /**
  *  Returns the default throttle time, in nanoseconds, for the given queue.
  *
  *  @param queue The queue to act as the receiver for this call.
  *
- *  @return A nanosecond value representing the given queue's throttle time.
+ *  @return A double value representing the given queue's throttle time in seconds.
  */
-uint64_t ah_throttle_queue_get_time(dispatch_queue_t queue);
+double ah_throttle_queue_get_time(dispatch_queue_t queue);
 
 /**
  *  Sets the behavior of the queue's throttle time mutability.
@@ -151,11 +151,11 @@ void ah_throttle_async(dispatch_queue_t queue, dispatch_block_t block);
 /**
  *  Submits a block for asynchronous execution on a throttled dispatch queue, with a specified throttle time, to the delay the queue by. This call returns immediately.
  *
- *  @param nanoseconds The number of nanoseconds by which to throttle the queue after completion of this block.
+ *  @param seconds     The number of seconds by which to throttle the queue after completion of this block.
  *  @param queue       The queue on which to submit the block. This parameter can not be NULL.
  *  @param block       The block to submit to the specified dispatch queue. This parameter can not be NULL.
  */
-void ah_throttle_after_async(uint64_t nanoseconds, dispatch_queue_t queue, dispatch_block_t block);
+void ah_throttle_after_async(double seconds, dispatch_queue_t queue, dispatch_block_t block);
 
 /**
  *  Submits a block object for execution on a dispatch queue and waits until that block and the throttle block complete.
@@ -168,11 +168,11 @@ void ah_throttle_sync(dispatch_queue_t queue, dispatch_block_t block);
 /**
  *  Submits a block object for execution on a dispatch queue, with a specified throttle time, and waits until that block and the throttle block complete.
  *
- *  @param nanoseconds The number of nanoseconds by which to throttle the queue after completion of this block.
+ *  @param seconds The number of seconds by which to throttle the queue after completion of this block.
  *  @param queue The queue on which to submit the block. This parameter can not be NULL.
  *  @param block The block to be invoked on the throttled dispatch queue. This parameter cannot be NULL.
  */
-void ah_throttle_after_sync(uint64_t nanoseconds, dispatch_queue_t queue, dispatch_block_t block);
+void ah_throttle_after_sync(double seconds, dispatch_queue_t queue, dispatch_block_t block);
 
 /**
  *  Generates a debug string of the throttle queue properties, into the given buffer.
