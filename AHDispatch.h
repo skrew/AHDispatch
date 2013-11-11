@@ -30,15 +30,15 @@
 
 // indicates queue behavior with regard to throttle time changes
 typedef enum {
-    AH_THROTTLE_MUTABILITY_NONE,
     AH_THROTTLE_MUTABILITY_ALL,
-    AH_THROTTLE_MUTABILITY_DEFAULT
+    AH_THROTTLE_MUTABILITY_DEFAULT,
+    AH_THROTTLE_MUTABILITY_NONE
 } ah_throttle_mutability_t;
 
 // indicates the way the throttle time is measured and applied.
 typedef enum  {
-    AH_THROTTLE_MONITOR_SERIAL,
     AH_THROTTLE_MONITOR_CONCURRENT,
+    AH_THROTTLE_MONITOR_SERIAL
 } ah_throttle_monitor_t;
 
 
@@ -68,7 +68,7 @@ dispatch_queue_t ah_throttle_queue_new(void);
  *  Takes a time interval in nanoseconds by which to delay the next task. Use the time multiplier constant `NSEC_PER_SEC` to help construst units of time expressed as seconds. For E.G. 3 seconds can be expressed as (3 * NSEC_PER_SEC).
  *
  *  @param label       A string label to identify this queue by. This parameter is optional and can be NULL.
- *  @param seconds    A double value representing th number of seconds by which to throttle tasks.
+ *  @param seconds    A double value representing the number of seconds by which to throttle tasks.
  *  @param mutability A `ah_throttle_mutability_t` value to apply to the given queue.
  *
  *  @return A `dispatch_queue_t` type with the specified throttle time.
@@ -125,13 +125,23 @@ ah_throttle_mutability_t ah_throttle_queue_get_mutability(dispatch_queue_t queue
 
 
 /**
- *  Get's the throttle monitor type for this queue.
+ *  Returns the throttle monitor type for this queue.
  *
  *  @param queue The queue to act as the receiver for this call.
  *
  *  @return a `ah_throttle_monitor_t` indicating serial or concurrent throttle monitoring
  */
 ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue);
+
+
+/**
+ *  Returns The number of throttled blocks currently in the queue.
+ *
+ *  @param queue The queue to act as the receiver for this call.
+ *
+ *  @return An `int` containing the number of throttled blocks currently in the queue.
+ */
+int ah_throttle_queue_get_size(dispatch_queue_t queue);
 
 
 #pragma mark - Queuing Tasks for Throttled Dispatch
@@ -184,9 +194,6 @@ void ah_throttle_queue_debug(dispatch_queue_t queue, char *buffer);
 
 #endif /* AlienHitcher_AHDispatch_h */
 
-/**
- *  GCD Queue Throttling Utilities
- */
 @interface AHDispatch : NSObject
 
 @end
