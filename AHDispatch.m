@@ -309,7 +309,7 @@ dispatch_queue_t ah_throttle_queue_create(const char *label,
                                           ah_throttle_mutability_t mutability,
                                           ah_throttle_monitor_t monitor)
 {
-    dispatch_queue_t queue = dispatch_queue_create(label, NULL);
+    dispatch_queue_t queue = dispatch_queue_create(label, DISPATCH_QUEUE_SERIAL);
     
     double *_sec = malloc(sizeof(double));
     *_sec = seconds;
