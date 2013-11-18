@@ -49,8 +49,18 @@ static void * kThrottleQueueDidBecomeIdleHandlerKey = &kThrottleQueueDidBecomeId
 typedef void (^AHThrottleQueueDidBecomeActiveHandler) (dispatch_queue_t queue, dispatch_time_t time);
 typedef void (^AHThrottleQueueDidBecomeIdleHandler) (dispatch_queue_t queue, dispatch_time_t time);
 
-#define AH_NSEC_PER_SEC	1000000000ull	/* nanoseconds per second */
-#define AH_THROTTLE_TIME_DEFAULT 0.5    /* sensible default */
+#define AH_NSEC_PER_SEC             1000000000ull	/* nanoseconds per second */
+#define AH_THROTTLE_TIME_DEFAULT    0.5             /* sensible default */
+
+
+#ifdef AH_DISPATCH_DEBUG
+    #define debugf(text, ...)  printf(debug_format(__LINE__, text), ##__VA_ARGS__);
+    #define debug(text)  printf(debug_format(__LINE__, text), NULL);
+#else
+    #define debugf(text, ...);
+    #define debug(text);
+#endif
+
 
 // any functions that don't begin with "ah_", are private
 
@@ -90,17 +100,26 @@ double timed_execution(void (^block)(void))
 }
 
 
-void print_now(void)
+
+
+char * debug_format(int line, char *format)
 {
     time_t now = time(NULL);
-    char label[256]  = "";
     
-    strcat(label, kThrottleDomainScope);
-    strcat(label, "-");
-    strcat(label, ctime(&now));
-    puts(label);
-}
+    // generate timestamp string
+    char *now_str = malloc(20);
+    memset(now_str, 0, sizeof(&now_str));
+    strftime(now_str, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+    
+    
+    char *formatted_str = malloc(256);
+    memset(formatted_str, 0, sizeof(&formatted_str));
+    strcat(formatted_str, now_str);
+    sprintf(formatted_str, "%s %s %d ", formatted_str, __FILE__, line);
+    strcat(formatted_str, format);
 
+    return formatted_str;
+}
 
 // we don't allow throttling on the default system queues
 // throttling is pointless on concurrent queues and the main queue
@@ -232,7 +251,9 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
      */
     
     // lets see how long the working block takes to execute...
-    printf("\nblock... ");
+    
+    debug("block started...\n");
+
     double executionSeconds = timed_execution(^{
         block();
     });
@@ -240,7 +261,7 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
     
     decrement_queue_count(queue);
     
-    printf("done in %gs\n", executionSeconds);
+    debugf("done in %gs\n", executionSeconds);
     
     // now lets determine if we need to throttle execution...
     ah_throttle_mutability_t mutability = (ah_throttle_mutability_t) dispatch_get_specific(kThrottleMutabilityKey);
@@ -249,12 +270,12 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
     if (AH_THROTTLE_MUTABILITY_ALL == mutability ||
         (AH_THROTTLE_MUTABILITY_DEFAULT == mutability && !explicit)) {
         
-        printf("dispatch seconds: %g\n", seconds);
-        
+        double dispatch_seconds = seconds;
         double *ctxsec = dispatch_get_specific(kThrottleTimeKey);
+        
         if (seconds != *ctxsec) {
             seconds = *ctxsec;
-            printf("overwrote seconds: %g\n", seconds);
+            debugf("overwrote %g throttle with %g\n", dispatch_seconds, seconds);
         }
     }
     
@@ -267,17 +288,18 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
     
     if (seconds > 0) {
         
-        printf("throttle sr: %g... ", seconds);
+        debugf("throttling: %g... \n", seconds);
         time_t start, end;
         start = time(NULL);
         
         throttle(seconds);
         
         end = time(NULL);
-        printf("done in %f.\n", difftime(end, start));
+        //debugf("done in %g.\n", difftime(end, start));
+        debug("done\n");
     }
     else {
-        printf("throttle unneccessary\n");
+        debug("throttle unneccessary\n");
     }
     
     // TODO  examine queue size and perform queueDidBecomeIdleBlock() if equal to zero
@@ -489,7 +511,8 @@ void ah_throttle_queue_debug(dispatch_queue_t queue, char *buffer)
     ah_throttle_monitor_t monitor = (ah_throttle_monitor_t) dispatch_queue_get_specific(queue, kThrottleMonitorKey);
     ah_throttle_mutability_t mutability = (ah_throttle_mutability_t) dispatch_queue_get_specific(queue, kThrottleMutabilityKey);
     
-    char * monstr = (AH_THROTTLE_MONITOR_CONCURRENT == monitor) ? "AH_THROTTLE_MONITOR_CONCURRENT" : "AH_THROTTLE_MONITOR_SERIAL";
+    char * monstr = (AH_THROTTLE_MONITOR_CONCURRENT == monitor) ? "AH_THROTTLE_MONITOR_CONCURRENT"
+                                                                : "AH_THROTTLE_MONITOR_SERIAL";
     
     char *mutestr = "";
     switch (mutability) {
