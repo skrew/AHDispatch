@@ -38,14 +38,14 @@
 #ifndef AlienHitcher_AHDispatch_h
 #define AlienHitcher_AHDispatch_h
 
-/*! Indicates queue behavior with regard to throttle time changes. */
+/*! Controls queue behavior with regard to throttle time changes. */
 typedef enum {
     AH_THROTTLE_MUTABILITY_ALL,
     AH_THROTTLE_MUTABILITY_DEFAULT,
     AH_THROTTLE_MUTABILITY_NONE
 } ah_throttle_mutability_t;
 
-/*! Indicates the way the throttle time is measured and applied. */
+/*! Controls the way the throttle time is measured and applied. */
 typedef enum  {
     AH_THROTTLE_MONITOR_CONCURRENT,
     AH_THROTTLE_MONITOR_SERIAL
@@ -202,6 +202,8 @@ void ah_throttle_after_sync(double seconds, dispatch_queue_t queue, dispatch_blo
  *  @param buffer Upon return, contains the characters of the debug information from the receiver. buffer must be large enough to contain all characters of the debug information
  */
 void ah_throttle_queue_debug(dispatch_queue_t queue, char *buffer);
+
+extern double AH_THROTTLE_TIME_DEFAULT;
 
 #endif /* AlienHitcher_AHDispatch_h */
 
