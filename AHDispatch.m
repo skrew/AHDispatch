@@ -36,10 +36,11 @@ static char * kThrottleDomainScope = "com.alienhitcher.ahdispatch.queue";
 static void * kThrottleTimeKey = &kThrottleTimeKey;
 static void * kThrottleMonitorKey = &kThrottleMonitorKey;
 static void * kThrottleMutabilityKey = &kThrottleMutabilityKey;
+static void * kThrottleCountKey = &kThrottleCountKey;
 
 // internal
 static void * kThrottleQueueKey = &kThrottleQueueKey;
-static void * kThrottleCountKey = &kThrottleCountKey;
+static void * kThrottleQueueFactoryKey = &kThrottleQueueFactoryKey;
 static void * kThrottleTimeModifiedKey = &kThrottleTimeModifiedKey;
 
 // callbacks
@@ -54,8 +55,14 @@ typedef void (^AHThrottleQueueDidBecomeIdleHandler) (dispatch_queue_t queue, dis
 
 
 #ifdef AH_DISPATCH_DEBUG
-    #define debugf(text, ...)  printf(debug_format(__LINE__, text), ##__VA_ARGS__);
-    #define debug(text)  printf(debug_format(__LINE__, text), NULL);
+    #define debugf(text, ...)  \
+        char *formatted_text =  debug_format(__LINE__, text); \
+        printf(formatted_text, ##__VA_ARGS__); \
+        free(formatted_text);
+    #define debug(text) \
+        char *formatted_text_null =  debug_format(__LINE__, text); \
+        printf(formatted_text_null, NULL); \
+        free(formatted_text_null);
 #else
     #define debugf(text, ...);
     #define debug(text);
@@ -63,6 +70,8 @@ typedef void (^AHThrottleQueueDidBecomeIdleHandler) (dispatch_queue_t queue, dis
 
 
 // any functions that don't begin with "ah_", are private
+
+#pragma mark - Private Functions
 
 // worker blocks are timed during execution, so we can determine the throttle
 // time for concurrent monitoring
@@ -100,8 +109,6 @@ double timed_execution(void (^block)(void))
 }
 
 
-
-
 char * debug_format(int line, char *format)
 {
     time_t now = time(NULL);
@@ -115,6 +122,7 @@ char * debug_format(int line, char *format)
     char *formatted_str = malloc(256);
     memset(formatted_str, 0, sizeof(&formatted_str));
     strcat(formatted_str, now_str);
+    free(now_str);
     sprintf(formatted_str, "%s %s %d ", formatted_str, __FILE__, line);
     strcat(formatted_str, format);
 
@@ -123,8 +131,18 @@ char * debug_format(int line, char *format)
 
 // we don't allow throttling on the default system queues
 // throttling is pointless on concurrent queues and the main queue
-bool valid_serial_queue(dispatch_queue_t queue)
+bool valid_throttle_queue(dispatch_queue_t queue)
 {
+    // only queues created by us are valid
+    char * queue_factory  = (char *) dispatch_queue_get_specific(queue, kThrottleQueueFactoryKey);
+    
+    if (queue_factory == NULL ||
+        strcmp(queue_factory, kThrottleDomainScope) != 0) {
+        return false;
+    }
+
+#warning this check could quite possibly no longer be needed
+    // out of the box system queues are invalid
     if (queue == NULL ||
         queue == dispatch_get_main_queue() ||
         queue == dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0) ||
@@ -133,7 +151,7 @@ bool valid_serial_queue(dispatch_queue_t queue)
         queue == dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)) {
         return false;
     }
-
+    
     return true;
 }
 
@@ -339,6 +357,7 @@ dispatch_queue_t ah_throttle_queue_create(const char *label,
     dispatch_queue_set_specific(queue, kThrottleMutabilityKey, (void *)mutability, NULL);
     dispatch_queue_set_specific(queue, kThrottleMonitorKey, (void *)monitor, NULL);
     dispatch_queue_set_specific(queue, kThrottleQueueKey, (void *)CFBridgingRetain(queue), (dispatch_function_t)CFBridgingRelease);
+    dispatch_queue_set_specific(queue, kThrottleQueueFactoryKey, kThrottleDomainScope, NULL);
     
     int *count = malloc(sizeof(int));
     *count = 0;
@@ -350,7 +369,7 @@ dispatch_queue_t ah_throttle_queue_create(const char *label,
 
 void ah_throttle_queue(dispatch_queue_t queue, double seconds)
 {
-    if (!valid_serial_queue(queue)) return;
+    if (!valid_throttle_queue(queue)) return;
     
     //  NOTE:
     //  We do not need to test for queue mutability here before changing the default
@@ -372,7 +391,7 @@ void ah_throttle_queue(dispatch_queue_t queue, double seconds)
 
 double ah_throttle_queue_get_time(dispatch_queue_t queue)
 {
-    if (!valid_serial_queue(queue)) {
+    if (!valid_throttle_queue(queue)) {
         return 0;
     }
     
@@ -384,7 +403,7 @@ double ah_throttle_queue_get_time(dispatch_queue_t queue)
 
 ah_throttle_mutability_t ah_throttle_queue_get_mutability(dispatch_queue_t queue)
 {
-    if (!valid_serial_queue(queue)) {
+    if (!valid_throttle_queue(queue)) {
         return AH_THROTTLE_MUTABILITY_NONE;
     }
     
@@ -397,7 +416,7 @@ ah_throttle_mutability_t ah_throttle_queue_get_mutability(dispatch_queue_t queue
 
 ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue)
 {
-    if (!valid_serial_queue(queue)) {
+    if (!valid_throttle_queue(queue)) {
         return AH_THROTTLE_MONITOR_CONCURRENT;
     }
     
@@ -410,7 +429,7 @@ ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue)
 
 int ah_throttle_queue_get_size(dispatch_queue_t queue)
 {
-    if (!valid_serial_queue(queue)) return 0;
+    if (!valid_throttle_queue(queue)) return 0;
     
     int *count;
     count = (int *)dispatch_queue_get_specific(queue, kThrottleCountKey);
@@ -434,7 +453,7 @@ void ah_throttle_queue_set_did_become_active_block(void (^active)(dispatch_queue
 
 void ah_throttle_async(dispatch_queue_t queue, dispatch_block_t block)
 {
-    if (!valid_serial_queue(queue) || block == NULL) {
+    if (!valid_throttle_queue(queue) || block == NULL) {
         return;
     }
     
@@ -452,7 +471,7 @@ void ah_throttle_async(dispatch_queue_t queue, dispatch_block_t block)
 
 void ah_throttle_after_async(double seconds, dispatch_queue_t queue, dispatch_block_t block)
 {
-    if (!valid_serial_queue(queue) || block == NULL) {
+    if (!valid_throttle_queue(queue) || block == NULL) {
         return;
     }
     
@@ -470,7 +489,7 @@ void ah_throttle_after_async(double seconds, dispatch_queue_t queue, dispatch_bl
 
 void ah_throttle_sync(dispatch_queue_t queue, dispatch_block_t block)
 {
-    if (!valid_serial_queue(queue) || block == NULL) {
+    if (!valid_throttle_queue(queue) || block == NULL) {
         return;
     }
     
@@ -488,7 +507,7 @@ void ah_throttle_sync(dispatch_queue_t queue, dispatch_block_t block)
 
 void ah_throttle_after_sync(double seconds, dispatch_queue_t queue, dispatch_block_t block)
 {
-    if (!valid_serial_queue(queue) || block == NULL) {
+    if (!valid_throttle_queue(queue) || block == NULL) {
         return;
     }
     
