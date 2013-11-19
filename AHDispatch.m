@@ -261,7 +261,7 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
 {
     dispatch_queue_t queue = (__bridge dispatch_queue_t)(dispatch_get_specific(kThrottleQueueKey));
     
-    // if we're dispatching to an empty queue, perform the did become active block
+    // TODO if we're dispatching to an empty queue, perform the did become active block
     /*
      if (ah_throttle_queue_get_size(queue) == 0) {
      

@@ -32,7 +32,7 @@ You can change the throttle time for a queue with `ah_throttle_queue` like this:
 ```
 ah_throttle_queue(throttled_queue, 1.5);
 ```
-**Note:** any queues that aren't created directly by AHDispatch, this includes any of the queues that iOS comes with out of the box (main or concurrent), will NOT work with AHDispatch's throttle functionality. This limitation was introduced to ensure that only serial queues are used with AHDispatch.
+**Note:** any queues that aren't created directly by AHDispatch, this includes any of the queues that iOS comes with out of the box (main or global), will NOT work with AHDispatch's throttle functionality. This limitation was introduced to ensure that only serial queues are used with AHDispatch.
 
 ##Requirements
 AHDispatch is written for ARC-enabled apps. By default your build target will need to comply with one of the following:
@@ -82,7 +82,7 @@ When we talk about throttle queues being mutable, is it always about the throttl
 Before we take a closer look at throttle mutability, lets briefly touch on throttle monitors so that we have a better understand of the context in which throttle mutability occurs.   
 
 ### Throttle Monitor Types
-A throttle monitor, indicated by the type `ah_throttle_monitor_t` is a device that controls the way in which the throttle time is measured and applied. This measuring of time can occur concurrently, while a worker block is being executed or serially (after a worker block has completed executing.)
+A throttle monitor, indicated by the type `ah_throttle_monitor_t` is a device that controls the way in which the throttle time is measured and applied. This measuring of time can occur concurrently, while a worker block is being executed or serially, after a worker block has completed executing.
 
 ####Serial Monitors
 A serial monitor goes to work after a worker block has finished executing. It is responsible for executing and monitoring throttle times inbetween worker blocks. If a queue has a throttle time of 0.5 sec, and a serial monitor, then the queue will be throttled for a time of 0.5 seconds between each worker block dispatched to the queue. So as you can see, throttle time monitoring and execution occurs serially, with respect to the blocks you dispatch to the throttle queue. They essentially create a time buffer between worker blocks.
@@ -109,7 +109,7 @@ If you create a throttle queue with a mutability type of `AH_THROTTLE_MUTABILITY
 
 If you want to prevent throttle time changes from affecting blocks already queued for execution, simply create a queue with a `ah_throttle_mutability_t` type of `AH_THROTTLE_MUTABILITY_NONE`. 
 
-**Remember**: throttle mutability relates to blocks that are already queued for execution. You can still affect the default throttle time of blocks submitted to the queue **after** a call to `ah_throttle_queue` regardless of the queue mutability type. 
+**Remember**: throttle mutability relates to blocks that are already queued for execution. You can still affect the default throttle time of blocks submitted to the queue **after** a call to `ah_throttle_queue()` regardless of the queue mutability type. 
 
 ##Debugging
 To enable the output of trace messages to the console, add the key `AH_DISPATCH_DEBUG` to the list of your *Target*'s **Preprocessor Macros**. In XCode 5, this can be found under the heading '**Apple LLVM 5.0 - Preprocessing**' in the **Build Settings** tab.
@@ -120,7 +120,7 @@ To enable the output of trace messages to the console, add the key `AH_DISPATCH_
 AHDispatch throttling only works with queues that have been created using AHDispatch's `ah_throttle_queue_create()` and `ah_throttle_queue_new()` function calls. This is necessary to ensure that queues used with the API are serial in nature. Furthermore, AHDispatch does not work with any of the default queues that come with iOS. This includes the main queue and all global queues. 
 
 ###Time Values
-Although all `seconds` paramater values are defined as type double in the interface, you can safely pass in values declared as type `NSTimeInterval`.
+Although all `seconds` paramater values are defined as type `double` in the interface, you can safely pass in values declared as type `NSTimeInterval`.
 
 ##Contact
 AHDispatch is maintained by [Ray Scott](https://github.com/rayascott) ([@rayascott](http://www.twitter.com/rayascott)).
