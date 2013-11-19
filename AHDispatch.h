@@ -27,7 +27,7 @@
 
 /*!
  * @interface AHDispatch
- * @abstract Provides queue throttling functionality for Grand Central Dispatch.
+ * @abstract Queue throttling functionality for Apple's Grand Central Dispatch (GCD).
  *
  */
 @interface AHDispatch : NSObject
@@ -68,20 +68,19 @@ typedef enum  {
  *  3. Mutability: AH_THROTTLE_MUTABILITY_ALL
  *  4. Throttle Monitor: AH_THROTTLE_MONITOR_CONCURRENT
  *
- *  @return A `dispatch_queue_t` initialized with sensible defaults.
+ *  @return A dispatch_queue_t initialized with sensible defaults.
  */
 dispatch_queue_t ah_throttle_queue_new(void);
 
 /*!
  *  Creates a serial dispatch queue with the the specified throttle time in nanoseconds.
- *  
- *  Takes a time interval in nanoseconds by which to delay the next task. Use the time multiplier constant `NSEC_PER_SEC` to help construst units of time expressed as seconds. For E.G. 3 seconds can be expressed as (3 * NSEC_PER_SEC).
  *
- *  @param label       A string label to identify this queue by. This parameter is optional and can be NULL.
- *  @param seconds    A double value representing the number of seconds by which to throttle tasks.
- *  @param mutability A `ah_throttle_mutability_t` value to apply to the given queue.
+ *  @param label        A string label to identify this queue by. This parameter is optional and can be NULL.
+ *  @param seconds      A double value representing the number of seconds by which to throttle tasks.
+ *  @param mutability   An ah_throttle_mutability_t value to apply to the given queue.
+ *  @param monitor      An ah_throttle_monitor value to apply to the given queue.
  *
- *  @return A `dispatch_queue_t` type with the specified throttle time.
+ *  @return A dispatch_queue_t type with the specified throttle time.
  */
 dispatch_queue_t ah_throttle_queue_create(const char *label,
                                           double seconds,
@@ -92,12 +91,12 @@ dispatch_queue_t ah_throttle_queue_create(const char *label,
  *  Adds the specified throttle time to the given dispatch queue
  *
  *  @param queue       The dispatch queue to throttle. This parameter can not be NULL.
- *  @param seconds     The number of seconds by which to throttle the queue after completion of each block.
+ *  @param seconds     The number of seconds by which to throttle the queue.
  */
 void ah_throttle_queue(dispatch_queue_t queue, double seconds);
 
 /*!
- *  Returns the default throttle time, in nanoseconds, for the given queue.
+ *  Returns the default throttle time, in seconds, for the given queue.
  *
  *  @param queue The queue to act as the receiver for this call.
  *
@@ -108,16 +107,16 @@ double ah_throttle_queue_get_time(dispatch_queue_t queue);
 /*!
  *  Sets the behavior of the queue's throttle time mutability.
  * 
- *  A queue's throttle time mutability setting comes into consideration when a client changes a queue's default throttle time (using `ah_queue_throttle()`) for a queue that already has throttled blocks queued in it.
+ *  A queue's throttle time mutability setting comes into consideration when a client changes a queue's default throttle time (using ah_throttle_queue()) for a queue that already has throttled blocks queued in it.
  *  
  *  Mutability behavior explained:
  * 
  *  1. AHDispatchThrottleMutabilityAll - changing the queues throttle time will affect all throttled execution blocks yet to be invoked. This is the default setting.
- *  2. AHDispatchThrottleMutabilityDefault - changing the queues throttle time will only affect throttled execution blocks that were submitted without an explicit throttle time. Set to this behavior type, throttle times for blocks dispatched with the `ah_throttle_after` variant calls are left unchanged after a 'ah_throttle_queue' call. Changes to the queue's throttle time only affect blocks submitted with calls that assumed the queue's default throttle time.
+ *  2. AHDispatchThrottleMutabilityDefault - changing the queues throttle time will only affect throttled execution blocks that were submitted without an explicit throttle time. Set to this behavior type, throttle times for blocks dispatched with the ah_throttle_after variant calls are left unchanged after a ah_throttle_queue() call. Changes to the queue's throttle time only affect blocks submitted with calls that assumed the queue's default throttle time.
  *  3. AHDispatchThrottleMutabilityNone - The throttle time of blocks already in the throttled queue are left unchanged by changes to the queue's throttle time. The new throttle time will, of course, be applied to any blocks submitted to the queue assuming an implicit throttle time.
  *
  *  @param queue      The queue to act as the receiver for this call.
- *  @param mutability A `ah_throttle_mutability_t` value to apply to the given queue.
+ *  @param mutability A ah_throttle_mutability_t value to apply to the given queue.
  *  
  *  @see ah_throttle_queue
  */
@@ -129,7 +128,7 @@ void ah_throttle_queue_set_mutability(dispatch_queue_t queue, ah_throttle_mutabi
  *
  *  @param queue The queue to act as the receiver for this call.
  *
- *  @return The `AHDispatchThrottleMutability` value for the given queue.
+ *  @return The ah_throttle_mutability_t value for the given queue.
  */
 ah_throttle_mutability_t ah_throttle_queue_get_mutability(dispatch_queue_t queue);
 
@@ -139,7 +138,7 @@ ah_throttle_mutability_t ah_throttle_queue_get_mutability(dispatch_queue_t queue
  *
  *  @param queue The queue to act as the receiver for this call.
  *
- *  @return a `ah_throttle_monitor_t` indicating serial or concurrent throttle monitoring
+ *  @return a ah_throttle_monitor_t indicating serial or concurrent throttle monitoring
  */
 ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue);
 
@@ -147,9 +146,11 @@ ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue);
 /*!
  *  Returns The number of throttled blocks currently in the queue.
  *
+ *  The currently executing block is included in the size.
+ *
  *  @param queue The queue to act as the receiver for this call.
  *
- *  @return An `int` containing the number of throttled blocks currently in the queue.
+ *  @return An int containing the number of throttled blocks currently in the queue.
  */
 int ah_throttle_queue_get_size(dispatch_queue_t queue);
 
@@ -163,17 +164,17 @@ int ah_throttle_queue_get_size(dispatch_queue_t queue);
 /*!
  *  Submits a block for asynchronous execution on a throttled dispatch queue and returns immediately. 
  *
- *  @param queue The queue on which to submit the block. Once execution of the block has completed the next block in the queue will be delayed until the queues throttle time has completed. This parameter can not be NULL.
- *  @param block The block to submit to the specified dispatch queue. If the block is submitted to a `dispatch_queue_t' that isn't throttled, the next block will begin executing immediately. This parameter can not be NULL.
+ *  @param queue The queue on which to submit the block. This parameter can not be NULL.
+ *  @param block The block to submit to the specified dispatch queue. If the block is submitted to a dispatch_queue_t that isn't throttled, the next block will begin executing immediately. This parameter can not be NULL.
  */
 void ah_throttle_async(dispatch_queue_t queue, dispatch_block_t block);
 
 /*!
  *  Submits a block for asynchronous execution on a throttled dispatch queue, with a specified throttle time, to the delay the queue by. This call returns immediately.
  *
- *  @param seconds     The number of seconds by which to throttle the queue after completion of this block.
- *  @param queue       The queue on which to submit the block. This parameter can not be NULL.
- *  @param block       The block to submit to the specified dispatch queue. This parameter can not be NULL.
+ *  @param seconds The number of seconds by which to throttle the queue relative to this block.
+ *  @param queue The queue on which to submit the block. This parameter can not be NULL.
+ *  @param block The block to submit to the specified dispatch queue. This parameter can not be NULL.
  */
 void ah_throttle_after_async(double seconds, dispatch_queue_t queue, dispatch_block_t block);
 
@@ -188,7 +189,7 @@ void ah_throttle_sync(dispatch_queue_t queue, dispatch_block_t block);
 /*!
  *  Submits a block object for execution on a dispatch queue, with a specified throttle time, and waits until that block and the throttle block complete.
  *
- *  @param seconds The number of seconds by which to throttle the queue after completion of this block.
+ *  @param seconds The number of seconds by which to throttle the queue relative to this block.
  *  @param queue The queue on which to submit the block. This parameter can not be NULL.
  *  @param block The block to be invoked on the throttled dispatch queue. This parameter cannot be NULL.
  */
@@ -197,8 +198,8 @@ void ah_throttle_after_sync(double seconds, dispatch_queue_t queue, dispatch_blo
 /*!
  *  Generates a debug string of the throttle queue properties, into the given buffer.
  *
- *  @param queue   The queue we want debug information on.
- *  @param buffer  Upon return, contains the characters of the debug information from the receiver. buffer must be large enough to contain all characters of the debug information
+ *  @param queue The queue we want debug information on.
+ *  @param buffer Upon return, contains the characters of the debug information from the receiver. buffer must be large enough to contain all characters of the debug information
  */
 void ah_throttle_queue_debug(dispatch_queue_t queue, char *buffer);
 
