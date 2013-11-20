@@ -141,7 +141,7 @@ bool valid_throttle_queue(dispatch_queue_t queue)
         return false;
     }
 
-#warning this check could quite possibly no longer be needed
+// TODO: this check could quite possibly no longer be needed
     // out of the box system queues are invalid
     if (queue == NULL ||
         queue == dispatch_get_main_queue() ||
@@ -288,10 +288,10 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
     if (AH_THROTTLE_MUTABILITY_ALL == mutability ||
         (AH_THROTTLE_MUTABILITY_DEFAULT == mutability && !explicit)) {
         
-        double dispatch_seconds = seconds;
         double *ctxsec = dispatch_get_specific(kThrottleTimeKey);
         
         if (seconds != *ctxsec) {
+            double dispatch_seconds = seconds;
             seconds = *ctxsec;
             debugf("overwrote %g throttle with %g\n", dispatch_seconds, seconds);
         }
