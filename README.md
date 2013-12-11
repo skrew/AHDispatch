@@ -1,5 +1,7 @@
 #AHDispatch for GCD
 
+AHDispatch provides queue throttling functionality for Apple's [Grand Central Dispatch](https://developer.apple.com/library/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/Reference/reference.html) (GCD) framework.
+
 <table width="100%" border=0>
 	<tr>
 		<td width="50%">1. <a href="#overview">Overview</a></td>
@@ -26,8 +28,6 @@
 	</tr>
 
 </table>
-
-AHDispatch provides queue throttling functionality for Apple's [Grand Central Dispatch](https://developer.apple.com/library/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/Reference/reference.html) (GCD) framework.
 
 ##1. <a name="overview">Overview</a>
 
