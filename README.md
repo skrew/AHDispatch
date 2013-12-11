@@ -113,7 +113,7 @@ All queues created are serial in nature. Changing the throttle time of a queue, 
 [`ah_throttle_sync`](http://rayascott.github.io/AHDispatch/index.html#//apple_ref/c/func/ah_throttle_sync)<br/>
 [`ah_throttle_after_sync`](http://rayascott.github.io/AHDispatch/index.html#//apple_ref/c/func/ah_throttle_after_sync)<br/>
 
-In addition to the standard block submission calls, [`ah_throttle_async()`](http://rayascott.github.io/AHDispatch/index.html#//apple_ref/c/func/ah_throttle_async) and [`ah_throttle_sync()`](http://rayascott.github.io/AHDispatch/index.html#//apple_ref/c/func/ah_throttle_sync), which use the current throttle time of the receiving queue, it is also possible to submit a block specifying a different throttle time to be applied after the execution of just that block. This can be acheived using the *ah_throttle_after_&#8727;* variant calls above.
+In addition to the standard block submission calls, [`ah_throttle_async()`](http://rayascott.github.io/AHDispatch/index.html#//apple_ref/c/func/ah_throttle_async) and [`ah_throttle_sync()`](http://rayascott.github.io/AHDispatch/index.html#//apple_ref/c/func/ah_throttle_sync), which use the current throttle time of the receiving queue, it is also possible to submit a block specifying a different throttle time to be applied after the execution of just that block. This can be acheived using the *`ah_throttle_after_*`* variant calls above.
 
 ##6. <a name="mutability">Throttle Mutability & Monitors</a>
 
