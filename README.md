@@ -1,4 +1,5 @@
 #AHDispatch for GCD
+[![Build Status](https://travis-ci.org/rayascott/AHDispatch.png)](https://travis-ci.org/rayascott/AHDispatch)
 
 AHDispatch provides queue throttling functionality for Apple's [Grand Central Dispatch](https://developer.apple.com/library/mac/documentation/Performance/Reference/GCD_libdispatch_Ref/Reference/reference.html) (GCD) framework.
 
