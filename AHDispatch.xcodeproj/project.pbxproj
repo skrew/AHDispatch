@@ -1,0 +1,422 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		18284407186278A500676CA5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18284406186278A500676CA5 /* Foundation.framework */; };
+		1828440C186278A500676CA5 /* AHDispatch.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1828440B186278A500676CA5 /* AHDispatch.h */; };
+		1828440E186278A500676CA5 /* AHDispatch.m in Sources */ = {isa = PBXBuildFile; fileRef = 1828440D186278A500676CA5 /* AHDispatch.m */; };
+		18284415186278A500676CA5 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18284414186278A500676CA5 /* XCTest.framework */; };
+		18284416186278A500676CA5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18284406186278A500676CA5 /* Foundation.framework */; };
+		1828441B186278A500676CA5 /* libAHDispatch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18284403186278A500676CA5 /* libAHDispatch.a */; };
+		18284421186278A500676CA5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1828441F186278A500676CA5 /* InfoPlist.strings */; };
+		18284423186278A500676CA5 /* AHDispatchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18284422186278A500676CA5 /* AHDispatchTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		18284419186278A500676CA5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 182843FB186278A500676CA5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 18284402186278A500676CA5;
+			remoteInfo = AHDispatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		18284401186278A500676CA5 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				1828440C186278A500676CA5 /* AHDispatch.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		18284403186278A500676CA5 /* libAHDispatch.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAHDispatch.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		18284406186278A500676CA5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1828440A186278A500676CA5 /* AHDispatch-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AHDispatch-Prefix.pch"; sourceTree = "<group>"; };
+		1828440B186278A500676CA5 /* AHDispatch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AHDispatch.h; sourceTree = "<group>"; };
+		1828440D186278A500676CA5 /* AHDispatch.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AHDispatch.m; sourceTree = "<group>"; };
+		18284413186278A500676CA5 /* AHDispatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AHDispatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		18284414186278A500676CA5 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		1828441E186278A500676CA5 /* AHDispatchTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AHDispatchTests-Info.plist"; sourceTree = "<group>"; };
+		18284420186278A500676CA5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		18284422186278A500676CA5 /* AHDispatchTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AHDispatchTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		18284400186278A500676CA5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18284407186278A500676CA5 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		18284410186278A500676CA5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18284415186278A500676CA5 /* XCTest.framework in Frameworks */,
+				1828441B186278A500676CA5 /* libAHDispatch.a in Frameworks */,
+				18284416186278A500676CA5 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		182843FA186278A500676CA5 = {
+			isa = PBXGroup;
+			children = (
+				18284408186278A500676CA5 /* AHDispatch */,
+				1828441C186278A500676CA5 /* AHDispatchTests */,
+				18284405186278A500676CA5 /* Frameworks */,
+				18284404186278A500676CA5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		18284404186278A500676CA5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				18284403186278A500676CA5 /* libAHDispatch.a */,
+				18284413186278A500676CA5 /* AHDispatchTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		18284405186278A500676CA5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				18284406186278A500676CA5 /* Foundation.framework */,
+				18284414186278A500676CA5 /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		18284408186278A500676CA5 /* AHDispatch */ = {
+			isa = PBXGroup;
+			children = (
+				1828440B186278A500676CA5 /* AHDispatch.h */,
+				1828440D186278A500676CA5 /* AHDispatch.m */,
+				18284409186278A500676CA5 /* Supporting Files */,
+			);
+			path = AHDispatch;
+			sourceTree = "<group>";
+		};
+		18284409186278A500676CA5 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1828440A186278A500676CA5 /* AHDispatch-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1828441C186278A500676CA5 /* AHDispatchTests */ = {
+			isa = PBXGroup;
+			children = (
+				18284422186278A500676CA5 /* AHDispatchTests.m */,
+				1828441D186278A500676CA5 /* Supporting Files */,
+			);
+			path = AHDispatchTests;
+			sourceTree = "<group>";
+		};
+		1828441D186278A500676CA5 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1828441E186278A500676CA5 /* AHDispatchTests-Info.plist */,
+				1828441F186278A500676CA5 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		18284402186278A500676CA5 /* AHDispatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 18284426186278A500676CA5 /* Build configuration list for PBXNativeTarget "AHDispatch" */;
+			buildPhases = (
+				182843FF186278A500676CA5 /* Sources */,
+				18284400186278A500676CA5 /* Frameworks */,
+				18284401186278A500676CA5 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AHDispatch;
+			productName = AHDispatch;
+			productReference = 18284403186278A500676CA5 /* libAHDispatch.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		18284412186278A500676CA5 /* AHDispatchTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 18284429186278A500676CA5 /* Build configuration list for PBXNativeTarget "AHDispatchTests" */;
+			buildPhases = (
+				1828440F186278A500676CA5 /* Sources */,
+				18284410186278A500676CA5 /* Frameworks */,
+				18284411186278A500676CA5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1828441A186278A500676CA5 /* PBXTargetDependency */,
+			);
+			name = AHDispatchTests;
+			productName = AHDispatchTests;
+			productReference = 18284413186278A500676CA5 /* AHDispatchTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		182843FB186278A500676CA5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "Alien Hitcher";
+			};
+			buildConfigurationList = 182843FE186278A500676CA5 /* Build configuration list for PBXProject "AHDispatch" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 182843FA186278A500676CA5;
+			productRefGroup = 18284404186278A500676CA5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				18284402186278A500676CA5 /* AHDispatch */,
+				18284412186278A500676CA5 /* AHDispatchTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		18284411186278A500676CA5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18284421186278A500676CA5 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		182843FF186278A500676CA5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1828440E186278A500676CA5 /* AHDispatch.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1828440F186278A500676CA5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				18284423186278A500676CA5 /* AHDispatchTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1828441A186278A500676CA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 18284402186278A500676CA5 /* AHDispatch */;
+			targetProxy = 18284419186278A500676CA5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		1828441F186278A500676CA5 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				18284420186278A500676CA5 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		18284424186278A500676CA5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		18284425186278A500676CA5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		18284427186278A500676CA5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/AHDispatch.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AHDispatch/AHDispatch-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		18284428186278A500676CA5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/AHDispatch.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AHDispatch/AHDispatch-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		1828442A186278A500676CA5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AHDispatch/AHDispatch-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "AHDispatchTests/AHDispatchTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Debug;
+		};
+		1828442B186278A500676CA5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(inherited)",
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AHDispatch/AHDispatch-Prefix.pch";
+				INFOPLIST_FILE = "AHDispatchTests/AHDispatchTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xctest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		182843FE186278A500676CA5 /* Build configuration list for PBXProject "AHDispatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18284424186278A500676CA5 /* Debug */,
+				18284425186278A500676CA5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		18284426186278A500676CA5 /* Build configuration list for PBXNativeTarget "AHDispatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18284427186278A500676CA5 /* Debug */,
+				18284428186278A500676CA5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		18284429186278A500676CA5 /* Build configuration list for PBXNativeTarget "AHDispatchTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1828442A186278A500676CA5 /* Debug */,
+				1828442B186278A500676CA5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 182843FB186278A500676CA5 /* Project object */;
+}
