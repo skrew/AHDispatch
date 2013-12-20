@@ -6,6 +6,20 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		18A3059E186318A700CC52BB /* Install Doc Set */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 18A3059F186318A700CC52BB /* Build configuration list for PBXAggregateTarget "Install Doc Set" */;
+			buildPhases = (
+				18A305A2186318BC00CC52BB /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Install Doc Set";
+			productName = "Install HeaderDocs";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		18284407186278A500676CA5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18284406186278A500676CA5 /* Foundation.framework */; };
 		1828440C186278A500676CA5 /* AHDispatch.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1828440B186278A500676CA5 /* AHDispatch.h */; };
@@ -51,6 +65,10 @@
 		1828441E186278A500676CA5 /* AHDispatchTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AHDispatchTests-Info.plist"; sourceTree = "<group>"; };
 		18284420186278A500676CA5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		18284422186278A500676CA5 /* AHDispatchTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AHDispatchTests.m; sourceTree = "<group>"; };
+		18A3059B1863145500CC52BB /* headerdoc2docset.sh */ = {isa = PBXFileReference; explicitFileType = text.script.sh; path = headerdoc2docset.sh; sourceTree = "<group>"; };
+		18A3059C1863147700CC52BB /* AHDispatch.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AHDispatch.podspec; sourceTree = "<group>"; };
+		18A3059D1863147700CC52BB /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		18A305A618634CF800CC52BB /* AHDispatch-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AHDispatch-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +100,9 @@
 				1828441C186278A500676CA5 /* AHDispatchTests */,
 				18284405186278A500676CA5 /* Frameworks */,
 				18284404186278A500676CA5 /* Products */,
+				18A3059C1863147700CC52BB /* AHDispatch.podspec */,
+				18A3059D1863147700CC52BB /* README.md */,
+				18A3059B1863145500CC52BB /* headerdoc2docset.sh */,
 			);
 			sourceTree = "<group>";
 		};
@@ -116,6 +137,7 @@
 		18284409186278A500676CA5 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				18A305A618634CF800CC52BB /* AHDispatch-Info.plist */,
 				1828440A186278A500676CA5 /* AHDispatch-Prefix.pch */,
 			);
 			name = "Supporting Files";
@@ -200,6 +222,7 @@
 			targets = (
 				18284402186278A500676CA5 /* AHDispatch */,
 				18284412186278A500676CA5 /* AHDispatchTests */,
+				18A3059E186318A700CC52BB /* Install Doc Set */,
 			);
 		};
 /* End PBXProject section */
@@ -214,6 +237,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		18A305A2186318BC00CC52BB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./headerdoc2docset.sh \n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		182843FF186278A500676CA5 /* Sources */ = {
@@ -386,6 +425,22 @@
 			};
 			name = Release;
 		};
+		18A305A0186318A700CC52BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "AHDispatch/AHDispatch-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		18A305A1186318A700CC52BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "AHDispatch/AHDispatch-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -412,6 +467,15 @@
 			buildConfigurations = (
 				1828442A186278A500676CA5 /* Debug */,
 				1828442B186278A500676CA5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		18A3059F186318A700CC52BB /* Build configuration list for PBXAggregateTarget "Install Doc Set" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18A305A0186318A700CC52BB /* Debug */,
+				18A305A1186318A700CC52BB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
