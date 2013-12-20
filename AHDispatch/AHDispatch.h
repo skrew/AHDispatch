@@ -1,6 +1,8 @@
-//
-//  AHDispatch.h
-//  AHDispatch
+/*!
+ * @header AHDispatch.h
+ *
+ * @abstract Queue throttling functionality for Apple's Grand Central Dispatch (GCD).
+ */
 //
 //  Created by Ray Scott on 29/10/2013.
 //  Copyright (c) 2013 Alien Hitcher. All rights reserved.
@@ -27,7 +29,8 @@
 
 /*!
  * @interface AHDispatch
- * @abstract Queue throttling functionality for Apple's Grand Central Dispatch (GCD).
+ *
+ * @discussion Queue throttling functionality for Apple's Grand Central Dispatch (GCD).
  *
  */
 @interface AHDispatch : NSObject
@@ -38,14 +41,20 @@
 #ifndef AlienHitcher_AHDispatch_h
 #define AlienHitcher_AHDispatch_h
 
-/*! Controls queue behavior with regard to throttle time changes. */
+/*! 
+    @typedef ah_throttle_mutability_t
+    @abstract Controls queue behavior with regard to throttle time changes.
+ */
 typedef enum {
     AH_THROTTLE_MUTABILITY_ALL,
     AH_THROTTLE_MUTABILITY_DEFAULT,
     AH_THROTTLE_MUTABILITY_NONE
 } ah_throttle_mutability_t;
 
-/*! Controls the way the throttle time is measured and applied. */
+/*! 
+    @typedef ah_throttle_monitor_t
+    @abstract Controls the way the throttle time is measured and applied.
+ */
 typedef enum  {
     AH_THROTTLE_MONITOR_CONCURRENT,
     AH_THROTTLE_MONITOR_SERIAL
@@ -54,15 +63,10 @@ typedef enum  {
 
 #pragma mark - Creating and Managing Throttled Queues
 
-///----------------------------------------------
-///  @name Creating and Managing Throttled Queues
-///----------------------------------------------
-
-
 /*!
  *  Creates a standard throttled queue with sensible defaults
  *
- *  Defaults:
+ *  @discussion Defaults:
  *  1. Label: char* representation of the time the queue was created
  *  2. Throttle Time: 0.5 seconds
  *  3. Mutability: AH_THROTTLE_MUTABILITY_ALL
@@ -107,7 +111,7 @@ double ah_throttle_queue_get_time(dispatch_queue_t queue);
 /*!
  *  Sets the behavior of the queue's throttle time mutability.
  * 
- *  A queue's throttle time mutability setting comes into consideration when a client changes a queue's default throttle time (using ah_throttle_queue()) for a queue that already has throttled blocks queued in it.
+ *  @discussion A queue's throttle time mutability setting comes into consideration when a client changes a queue's default throttle time (using ah_throttle_queue()) for a queue that already has throttled blocks queued in it.
  *  
  *  Mutability behavior explained:
  * 
@@ -146,7 +150,7 @@ ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue);
 /*!
  *  Returns The number of throttled blocks currently in the queue.
  *
- *  The currently executing block is included in the size.
+ *  @discussion The currently executing block is included in the size.
  *
  *  @param queue The queue to act as the receiver for this call.
  *
@@ -156,10 +160,6 @@ int ah_throttle_queue_get_size(dispatch_queue_t queue);
 
 
 #pragma mark - Queuing Tasks for Throttled Dispatch
-
-///--------------------------------------------
-///  @name Queuing Tasks for Throttled Dispatch
-///--------------------------------------------
 
 /*!
  *  Submits a block for asynchronous execution on a throttled dispatch queue and returns immediately. 
