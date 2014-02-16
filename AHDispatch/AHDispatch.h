@@ -41,6 +41,9 @@
 #ifndef AlienHitcher_AHDispatch_h
 #define AlienHitcher_AHDispatch_h
 
+
+typedef void (^AHThrottleQueueEventHandler) (dispatch_queue_t queue, dispatch_time_t time);
+
 /*! 
     @typedef ah_throttle_mutability_t
     @abstract Controls queue behavior with regard to throttle time changes.
@@ -60,6 +63,11 @@ typedef enum  {
     AH_THROTTLE_MONITOR_SERIAL
 } ah_throttle_monitor_t;
 
+
+typedef enum {
+    AH_THROTTLE_QUEUE_DID_BECOME_ACTIVE_EVENT,
+    AH_THROTTLE_QUEUE_DID_BECOME_IDLE_EVENT
+} ah_throttle_queue_event_t;
 
 #pragma mark - Creating and Managing Throttled Queues
 
@@ -158,6 +166,12 @@ ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue);
  */
 int ah_throttle_queue_get_size(dispatch_queue_t queue);
 
+
+#pragma mark - Working with Event Callback Handlers
+
+void ah_throttle_queue_set_event_handler(dispatch_queue_t queue,
+                                         ah_throttle_queue_event_t event,
+                                         AHThrottleQueueEventHandler handler);
 
 #pragma mark - Queuing Tasks for Throttled Dispatch
 
