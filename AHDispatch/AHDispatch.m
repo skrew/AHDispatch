@@ -43,12 +43,12 @@ static void * kThrottleQueueKey = &kThrottleQueueKey;
 static void * kThrottleQueueFactoryKey = &kThrottleQueueFactoryKey;
 static void * kThrottleTimeModifiedKey = &kThrottleTimeModifiedKey;
 
-// callbacks
-static void * kThrottleQueueDidBecomeActiveHandlerKey = &kThrottleQueueDidBecomeActiveHandlerKey;
-static void * kThrottleQueueDidBecomeIdleHandlerKey = &kThrottleQueueDidBecomeIdleHandlerKey;
+// callback event handlers
+static void * kThrottleQueueDidBecomeActiveEventHandlerKey = &kThrottleQueueDidBecomeActiveEventHandlerKey;
+static void * kThrottleQueueDidBecomeIdleEventHandlerKey = &kThrottleQueueDidBecomeIdleEventHandlerKey;
 
-typedef void (^AHThrottleQueueDidBecomeActiveHandler) (dispatch_queue_t queue, dispatch_time_t time);
-typedef void (^AHThrottleQueueDidBecomeIdleHandler) (dispatch_queue_t queue, dispatch_time_t time);
+//typedef void (^AHThrottleQueueDidBecomeActiveHandler) (dispatch_queue_t queue, dispatch_time_t time);
+//typedef void (^AHThrottleQueueDidBecomeIdleHandler) (dispatch_queue_t queue, dispatch_time_t time);
 
 #define AH_NSEC_PER_SEC             1000000000ull	/* nanoseconds per second */
 #define AH_THROTTLE_TIME_DEFAULT    0.5             /* sensible default */
@@ -261,9 +261,10 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
 {
     dispatch_queue_t queue = (__bridge dispatch_queue_t)(dispatch_get_specific(kThrottleQueueKey));
     
+    
     // TODO if we're dispatching to an empty queue, perform the did become active block
     /*
-     if (ah_throttle_queue_get_size(queue) == 0) {
+     if (ah_throttle_queue_get_size(queue) == 0) { // but where do we increment the queue count??
      
      }
      */
@@ -320,8 +321,15 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
         debug("throttle unneccessary\n");
     }
     
-    // TODO  examine queue size and perform queueDidBecomeIdleBlock() if equal to zero
-    
+    //  examine queue size and
+    if (ah_throttle_queue_get_size(queue) == 0) {
+        
+        AHThrottleQueueEventHandler handler = (__bridge AHThrottleQueueEventHandler)dispatch_get_specific(kThrottleQueueDidBecomeIdleEventHandlerKey);
+        
+        if (handler) {
+            handler(queue, DISPATCH_TIME_NOW);
+        }
+    }
 }
 
 
@@ -443,10 +451,34 @@ int ah_throttle_queue_get_size(dispatch_queue_t queue)
     return *count;
 }
 
-void ah_throttle_queue_set_did_become_active_block(void (^active)(dispatch_queue_t queue, dispatch_time_t time))
+
+#pragma mark - Working with Event Callback Handlers
+
+void ah_throttle_queue_set_event_handler(dispatch_queue_t queue,
+                                         ah_throttle_queue_event_t event,
+                                         AHThrottleQueueEventHandler handler)
 {
+    if (!queue || !event) return;
     
+    switch (event) {
+        case AH_THROTTLE_QUEUE_DID_BECOME_ACTIVE_EVENT:
+            dispatch_queue_set_specific(queue,
+                                        kThrottleQueueDidBecomeActiveEventHandlerKey,
+                                        (void *)CFBridgingRetain(handler),
+                                        (dispatch_function_t)CFBridgingRelease);
+            break;
+        case AH_THROTTLE_QUEUE_DID_BECOME_IDLE_EVENT:
+            dispatch_queue_set_specific(queue,
+                                        kThrottleQueueDidBecomeIdleEventHandlerKey,
+                                        (void *)CFBridgingRetain(handler),
+                                        (dispatch_function_t)CFBridgingRelease);
+            break;
+            
+        default:
+            return;
+    }
 }
+
 
 #pragma mark - Queuing Tasks for Throttled Dispatch
 
