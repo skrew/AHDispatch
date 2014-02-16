@@ -5,7 +5,7 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>CD8131DD-6EA3-4B3D-8EDD-27B0CFE527D1</string>
+	<string>BC366A00-5D22-4A88-85BE-C4DD12C60195</string>
 	<key>IDESourceControlProjectName</key>
 	<string>AHDispatch</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
@@ -14,11 +14,11 @@
 		<string>https://github.com/rayascott/AHDispatch.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>AHDispatch/AHDispatch.xcodeproj/project.xcworkspace</string>
+	<string>AHDispatch.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>A3B29B26-99B7-4471-8FB4-A56721175AB2</key>
-		<string>../../..</string>
+		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/rayascott/AHDispatch.git</string>

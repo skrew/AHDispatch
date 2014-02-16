@@ -29,6 +29,7 @@
 		1828441B186278A500676CA5 /* libAHDispatch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18284403186278A500676CA5 /* libAHDispatch.a */; };
 		18284421186278A500676CA5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1828441F186278A500676CA5 /* InfoPlist.strings */; };
 		18284423186278A500676CA5 /* AHDispatchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 18284422186278A500676CA5 /* AHDispatchTests.m */; };
+		1856A52618B12C73006F92FA /* AHDispatchTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1856A52518B12C73006F92FA /* AHDispatchTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,8 @@
 		1828441E186278A500676CA5 /* AHDispatchTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AHDispatchTests-Info.plist"; sourceTree = "<group>"; };
 		18284420186278A500676CA5 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		18284422186278A500676CA5 /* AHDispatchTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AHDispatchTests.m; sourceTree = "<group>"; };
+		1856A52518B12C73006F92FA /* AHDispatchTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AHDispatchTest.m; sourceTree = "<group>"; };
+		1856A52718B12CEF006F92FA /* AHDispatchTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AHDispatchTest.h; sourceTree = "<group>"; };
 		18A3059B1863145500CC52BB /* headerdoc2docset.sh */ = {isa = PBXFileReference; explicitFileType = text.script.sh; path = headerdoc2docset.sh; sourceTree = "<group>"; };
 		18A3059C1863147700CC52BB /* AHDispatch.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AHDispatch.podspec; sourceTree = "<group>"; };
 		18A3059D1863147700CC52BB /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
@@ -146,6 +149,7 @@
 		1828441C186278A500676CA5 /* AHDispatchTests */ = {
 			isa = PBXGroup;
 			children = (
+				1856A52818B12CFC006F92FA /* Core */,
 				18284422186278A500676CA5 /* AHDispatchTests.m */,
 				1828441D186278A500676CA5 /* Supporting Files */,
 			);
@@ -159,6 +163,15 @@
 				1828441F186278A500676CA5 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1856A52818B12CFC006F92FA /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				1856A52718B12CEF006F92FA /* AHDispatchTest.h */,
+				1856A52518B12C73006F92FA /* AHDispatchTest.m */,
+			);
+			name = Core;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -241,16 +254,16 @@
 /* Begin PBXShellScriptBuildPhase section */
 		18A305A2186318BC00CC52BB /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			files = (
 			);
 			inputPaths = (
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "./headerdoc2docset.sh \n";
+			shellScript = ./headerdoc2docset.sh;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -267,6 +280,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1856A52618B12C73006F92FA /* AHDispatchTest.m in Sources */,
 				18284423186278A500676CA5 /* AHDispatchTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
