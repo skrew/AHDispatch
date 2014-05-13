@@ -28,6 +28,8 @@
 #import "AHDispatch.h"
 
 @interface AHDispatchTests : AHDispatchTest
+@property (strong) AHThrottleQueueEventHandler activeHandler;
+@property (strong) dispatch_queue_t tq;
 
 @end
 
@@ -47,39 +49,64 @@
 
 - (void)testExample
 {
-    AHThrottleQueueEventHandler hdl = ^(dispatch_queue_t queue, dispatch_time_t time) {
-        NSLog(@"idle handler!");
+    self.tq = ah_throttle_queue_create(nil,
+                                       0.1,
+                                       AH_THROTTLE_MUTABILITY_NONE,
+                                       AH_THROTTLE_MONITOR_CONCURRENT);
+    
+    // active handler
+    //self.activeHandler
+    AHThrottleQueueEventHandler ahdl = ^(dispatch_queue_t queue, dispatch_time_t time) {
+        NSLog(@"____ active handler!");
+    };
+    
+    ah_throttle_queue_set_event_handler(self.tq,
+                                        AH_THROTTLE_QUEUE_DID_BECOME_ACTIVE_EVENT,
+                                        ahdl);
+
+    
+    // idle handler
+     AHThrottleQueueEventHandler hdl = ^(dispatch_queue_t queue, dispatch_time_t time) {
+        NSLog(@"____ idle handler A!");
         [self signalFinished];
     };
     
-    
-    dispatch_queue_t tq = ah_throttle_queue_create(nil,
-                                                   3.0,
-                                                   AH_THROTTLE_MUTABILITY_NONE,
-                                                   AH_THROTTLE_MONITOR_CONCURRENT);
-    ah_throttle_queue_set_event_handler(tq,
+    ah_throttle_queue_set_event_handler(self.tq,
                                         AH_THROTTLE_QUEUE_DID_BECOME_IDLE_EVENT,
                                         hdl);
     
-    ah_throttle_after_async(3.0, tq, ^{
+    
+    
+    
+    ah_throttle_after_async(3.0, self.tq, ^{
         NSLog(@"I'm worker block 1");
     });
     
-    ah_throttle_async(tq, ^{
+    ah_throttle_async(self.tq, ^{
         NSLog(@"I'm worker block 2");
     });
     
-    ah_throttle_async(tq, ^{
+    ah_throttle_async(self.tq, ^{
         NSLog(@"I'm worker block 3");
     });
     
     [self waitUntilFinished];
     
-    ah_throttle_after_async(3.0, tq, ^{
+    AHThrottleQueueEventHandler ihdl2 = ^(dispatch_queue_t queue, dispatch_time_t time) {
+        NSLog(@"____ idle handler B!");
+        [self signalFinished];
+    };
+
+    ah_throttle_queue_set_event_handler(self.tq,
+                                        AH_THROTTLE_QUEUE_DID_BECOME_IDLE_EVENT,
+                                        ihdl2);
+
+    
+    ah_throttle_after_async(3.0, self.tq, ^{
         NSLog(@"I'm worker block A");
     });
     
-    ah_throttle_async(tq, ^{
+    ah_throttle_async(self.tq, ^{
         NSLog(@"I'm worker block B");
     });
 
