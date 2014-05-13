@@ -65,8 +65,8 @@ typedef enum  {
 
 
 typedef enum {
-    AH_THROTTLE_QUEUE_DID_BECOME_ACTIVE_EVENT,
-    AH_THROTTLE_QUEUE_DID_BECOME_IDLE_EVENT
+    AH_THROTTLE_QUEUE_DID_BECOME_ACTIVE_EVENT = 0,
+    AH_THROTTLE_QUEUE_DID_BECOME_IDLE_EVENT = 1
 } ah_throttle_queue_event_t;
 
 #pragma mark - Creating and Managing Throttled Queues
