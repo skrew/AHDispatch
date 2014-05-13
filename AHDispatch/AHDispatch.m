@@ -29,7 +29,6 @@
 #import <dispatch/time.h>
 #import <mach/mach.h>
 
-
 static char * kThrottleDomainScope = "com.alienhitcher.ahdispatch.queue";
 
 // properties
@@ -42,6 +41,7 @@ static void * kThrottleCountKey = &kThrottleCountKey;
 static void * kThrottleQueueKey = &kThrottleQueueKey;
 static void * kThrottleQueueFactoryKey = &kThrottleQueueFactoryKey;
 static void * kThrottleTimeModifiedKey = &kThrottleTimeModifiedKey;
+static void * kThrottleQueuePreviousEventHandledKey = &kThrottleQueuePreviousEventHandledKey;
 
 // callback event handlers
 static void * kThrottleQueueDidBecomeActiveEventHandlerKey = &kThrottleQueueDidBecomeActiveEventHandlerKey;
@@ -49,6 +49,9 @@ static void * kThrottleQueueDidBecomeIdleEventHandlerKey = &kThrottleQueueDidBec
 
 //typedef void (^AHThrottleQueueDidBecomeActiveHandler) (dispatch_queue_t queue, dispatch_time_t time);
 //typedef void (^AHThrottleQueueDidBecomeIdleHandler) (dispatch_queue_t queue, dispatch_time_t time);
+
+static NSLock *dispatchLock;
+static NSLock *submissionLock;
 
 #define AH_NSEC_PER_SEC             1000000000ull	/* nanoseconds per second */
 #define AH_THROTTLE_TIME_DEFAULT    0.5             /* sensible default */
@@ -141,7 +144,8 @@ bool valid_throttle_queue(dispatch_queue_t queue)
         return false;
     }
 
-// TODO: this check could quite possibly no longer be needed
+    
+    // TODO: this check could quite possibly no longer be needed
     // out of the box system queues are invalid
     if (queue == NULL ||
         queue == dispatch_get_main_queue() ||
@@ -188,7 +192,7 @@ static ThrottleHandler const throttle = ^(double seconds) {
                        
 
 #ifdef DEBUG
-                       //printf("%g sec throttle complete.\n", seconds);
+                       //printf("%g sec throttle complete.\n", seconds); 
 #endif
                        dispatch_semaphore_signal(sema);
                    });
@@ -202,17 +206,21 @@ static ThrottleHandler const throttle = ^(double seconds) {
 };
 
 
-void increment_queue_count(dispatch_queue_t queue)
+int increment_queue_count(dispatch_queue_t queue)
 {
     int *count = dispatch_queue_get_specific(queue, kThrottleCountKey);
     *count += 1;
+    
+    return *count;
 }
 
 
-void decrement_queue_count(dispatch_queue_t queue)
+int decrement_queue_count(dispatch_queue_t queue)
 {
     int *count = dispatch_queue_get_specific(queue, kThrottleCountKey);
     *count -= 1;
+    
+    return *count;
 }
 
 // ensure queue has valid throttle context
@@ -268,6 +276,8 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
      
      }
      */
+
+    //debugf("queue size: %i", (int)ah_throttle_queue_get_size(queue));
     
     // lets see how long the working block takes to execute...
     
@@ -321,7 +331,7 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
         debug("throttle unneccessary\n");
     }
     
-    //  examine queue size and
+    //  examine queue size and perform idle queue handler if it's empty
     if (ah_throttle_queue_get_size(queue) == 0) {
         
         AHThrottleQueueEventHandler handler = (__bridge AHThrottleQueueEventHandler)dispatch_get_specific(kThrottleQueueDidBecomeIdleEventHandlerKey);
@@ -332,6 +342,31 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
     }
 }
 
+
+bool handle_queue_did_become_active(dispatch_queue_t queue)
+{
+    
+    bool performedHandle = false;
+    
+    void * previousEventKey = (void *)dispatch_queue_get_specific(queue, kThrottleQueuePreviousEventHandledKey);
+    
+    if (previousEventKey != kThrottleQueueDidBecomeIdleEventHandlerKey) {
+        return false;
+    }
+    
+    if (increment_queue_count(queue) == 1) {
+        
+        AHThrottleQueueEventHandler handler = (__bridge AHThrottleQueueEventHandler)dispatch_queue_get_specific(queue,
+                                                                                                                kThrottleQueueDidBecomeActiveEventHandlerKey);
+        
+        if (handler) {
+            handler(queue, DISPATCH_TIME_NOW);
+        }
+    }
+
+    
+    return performedHandle;
+}
 
 #pragma mark - Creating and Managing Throttled Queues
 
@@ -357,6 +392,12 @@ dispatch_queue_t ah_throttle_queue_create(const char *label,
                                           ah_throttle_mutability_t mutability,
                                           ah_throttle_monitor_t monitor)
 {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dispatchLock = [[NSLock alloc] init];
+        submissionLock = [[NSLock alloc] init];
+    });
+    
     dispatch_queue_t queue = dispatch_queue_create(label, DISPATCH_QUEUE_SERIAL);
     
     double *_sec = malloc(sizeof(double));
@@ -366,6 +407,7 @@ dispatch_queue_t ah_throttle_queue_create(const char *label,
     dispatch_queue_set_specific(queue, kThrottleMonitorKey, (void *)monitor, NULL);
     dispatch_queue_set_specific(queue, kThrottleQueueKey, (void *)CFBridgingRetain(queue), (dispatch_function_t)CFBridgingRelease);
     dispatch_queue_set_specific(queue, kThrottleQueueFactoryKey, kThrottleDomainScope, NULL);
+    dispatch_queue_set_specific(queue, kThrottleQueuePreviousEventHandledKey, kThrottleQueueDidBecomeIdleEventHandlerKey, NULL);
     
     int *count = malloc(sizeof(int));
     *count = 0;
@@ -458,7 +500,7 @@ void ah_throttle_queue_set_event_handler(dispatch_queue_t queue,
                                          ah_throttle_queue_event_t event,
                                          AHThrottleQueueEventHandler handler)
 {
-    if (!queue || !event) return;
+    if (!queue) return;
     
     switch (event) {
         case AH_THROTTLE_QUEUE_DID_BECOME_ACTIVE_EVENT:
@@ -489,15 +531,25 @@ void ah_throttle_async(dispatch_queue_t queue, dispatch_block_t block)
         return;
     }
     
+    // we don't want race condition errors between queue size incremention and
+    // dispatch of the block to the queue, otherwise handlers won't be invoked
+    // when necessary
+    [submissionLock lock];
+    
     enforce_throttle_context(queue);
-    increment_queue_count(queue);
+    handle_queue_did_become_active(queue);
     
     dispatch_async(queue, ^{
-        @synchronized(queue) {
-            
-            throttle_dispatch(block, *(double *)dispatch_get_specific(kThrottleTimeKey), false);
-        }
+        
+        // Locking keeps event handling calculations, further down the line, thread safe.
+        // We don't want multiple threads working with the same queue to manipulate
+        // the queue size to state that doesn't represent reality.
+        [dispatchLock lock];
+        throttle_dispatch(block, *(double *)dispatch_get_specific(kThrottleTimeKey), false);
+        [dispatchLock unlock];
     });
+    
+    [submissionLock unlock];
 }
 
 
@@ -507,15 +559,19 @@ void ah_throttle_after_async(double seconds, dispatch_queue_t queue, dispatch_bl
         return;
     }
     
+    [submissionLock lock];
+    
     enforce_throttle_context(queue);
-    increment_queue_count(queue);
+    handle_queue_did_become_active(queue);
     
     dispatch_async(queue, ^{
-       @synchronized(queue) {
-           
-           throttle_dispatch(block, seconds, true);
-       }
+        
+        [dispatchLock lock];
+        throttle_dispatch(block, seconds, true);
+        [dispatchLock unlock];
     });
+    
+    [submissionLock unlock];
 }
 
 
@@ -525,15 +581,19 @@ void ah_throttle_sync(dispatch_queue_t queue, dispatch_block_t block)
         return;
     }
     
+    [submissionLock lock];
+    
     enforce_throttle_context(queue);
-    increment_queue_count(queue);
+    handle_queue_did_become_active(queue);
     
     dispatch_sync(queue, ^{
-        @synchronized(queue) {
-
-            throttle_dispatch(block, *(double *) dispatch_get_specific(kThrottleTimeKey), false);
-        }
+        
+        [dispatchLock lock];
+        throttle_dispatch(block, *(double *) dispatch_get_specific(kThrottleTimeKey), false);
+        [dispatchLock unlock];
     });
+    
+    [submissionLock unlock];
 }
 
 
@@ -543,15 +603,19 @@ void ah_throttle_after_sync(double seconds, dispatch_queue_t queue, dispatch_blo
         return;
     }
     
+    [submissionLock lock];
+    
     enforce_throttle_context(queue);
-    increment_queue_count(queue);
+    handle_queue_did_become_active(queue);
     
     dispatch_sync(queue, ^{
-        @synchronized(queue) {
-            
-            throttle_dispatch(block, seconds, true);
-        }
+        
+        [dispatchLock lock];
+        throttle_dispatch(block, seconds, true);
+        [dispatchLock unlock];
     });
+    
+    [submissionLock unlock];
 }
 
 
