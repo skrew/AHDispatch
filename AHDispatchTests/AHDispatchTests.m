@@ -50,7 +50,7 @@
 - (void)testExample
 {
     self.tq = ah_throttle_queue_create(nil,
-                                       0.1,
+                                       0.5,
                                        AH_THROTTLE_MUTABILITY_NONE,
                                        AH_THROTTLE_MONITOR_CONCURRENT);
     
@@ -75,8 +75,7 @@
                                         AH_THROTTLE_QUEUE_DID_BECOME_IDLE_EVENT,
                                         hdl);
     
-    
-    
+    NSLog(@"active? %@", ah_throttle_queue_is_active(self.tq) ? @"yes" : @"no");
     
     ah_throttle_after_async(3.0, self.tq, ^{
         NSLog(@"I'm worker block 1");
@@ -86,6 +85,9 @@
         NSLog(@"I'm worker block 2");
     });
     
+    
+    NSLog(@"active? %@", ah_throttle_queue_is_active(self.tq) ? @"yes" : @"no");
+    
     ah_throttle_async(self.tq, ^{
         NSLog(@"I'm worker block 3");
     });
@@ -94,7 +96,6 @@
     
     AHThrottleQueueEventHandler ihdl2 = ^(dispatch_queue_t queue, dispatch_time_t time) {
         NSLog(@"____ idle handler B!");
-        [self signalFinished];
     };
 
     ah_throttle_queue_set_event_handler(self.tq,
@@ -108,9 +109,14 @@
     
     ah_throttle_async(self.tq, ^{
         NSLog(@"I'm worker block B");
+        [self signalFinished];
     });
+    
+    //NSLog(@"active? %@", ah_throttle_queue_is_active(self.tq) ? @"yes" : @"no");
 
     [self waitUntilFinished];
+    
+    NSLog(@"active? %@", ah_throttle_queue_is_active(self.tq) ? @"yes" : @"no");
 }
 
 @end
