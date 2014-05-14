@@ -47,9 +47,6 @@ static void * kThrottleQueuePreviousEventHandledKey = &kThrottleQueuePreviousEve
 static void * kThrottleQueueDidBecomeActiveEventHandlerKey = &kThrottleQueueDidBecomeActiveEventHandlerKey;
 static void * kThrottleQueueDidBecomeIdleEventHandlerKey = &kThrottleQueueDidBecomeIdleEventHandlerKey;
 
-//typedef void (^AHThrottleQueueDidBecomeActiveHandler) (dispatch_queue_t queue, dispatch_time_t time);
-//typedef void (^AHThrottleQueueDidBecomeIdleHandler) (dispatch_queue_t queue, dispatch_time_t time);
-
 static NSLock *dispatchLock;
 static NSLock *submissionLock;
 
@@ -338,6 +335,11 @@ void throttle_dispatch(dispatch_block_t block, double seconds, bool explicit)
         
         if (handler) {
             handler(queue, DISPATCH_TIME_NOW);
+            dispatch_queue_set_specific(queue,
+                                        kThrottleQueuePreviousEventHandledKey,
+                                        kThrottleQueueDidBecomeIdleEventHandlerKey,
+                                        NULL);
+            
         }
     }
 }
@@ -347,7 +349,6 @@ bool handle_queue_did_become_active(dispatch_queue_t queue)
 {
     
     bool performedHandle = false;
-    
     void * previousEventKey = (void *)dispatch_queue_get_specific(queue, kThrottleQueuePreviousEventHandledKey);
     
     if (previousEventKey != kThrottleQueueDidBecomeIdleEventHandlerKey) {
@@ -356,15 +357,20 @@ bool handle_queue_did_become_active(dispatch_queue_t queue)
     
     if (increment_queue_count(queue) == 1) {
         
-        AHThrottleQueueEventHandler handler = (__bridge AHThrottleQueueEventHandler)dispatch_queue_get_specific(queue,
-                                                                                                                kThrottleQueueDidBecomeActiveEventHandlerKey);
+        AHThrottleQueueEventHandler handler = (__bridge AHThrottleQueueEventHandler)
+                                                    dispatch_queue_get_specific(queue,
+                                                                                kThrottleQueueDidBecomeActiveEventHandlerKey);
         
         if (handler) {
             handler(queue, DISPATCH_TIME_NOW);
+            performedHandle = true;
+            dispatch_queue_set_specific(queue,
+                                        kThrottleQueuePreviousEventHandledKey,
+                                        kThrottleQueueDidBecomeActiveEventHandlerKey,
+                                        NULL);
         }
     }
 
-    
     return performedHandle;
 }
 
@@ -493,6 +499,23 @@ int ah_throttle_queue_get_size(dispatch_queue_t queue)
     return *count;
 }
 
+bool ah_throttle_queue_is_active(dispatch_queue_t queue)
+{
+    
+    bool isActive = false;
+    
+    if (!valid_throttle_queue(queue)) return false;
+    
+    int *count;
+    count = (int *)dispatch_queue_get_specific(queue, kThrottleCountKey);
+
+    if (count != NULL &&
+        *count > 0) {
+        isActive = true;
+    }
+    
+    return isActive;
+}
 
 #pragma mark - Working with Event Callback Handlers
 
