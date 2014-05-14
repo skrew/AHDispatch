@@ -134,7 +134,6 @@ double ah_throttle_queue_get_time(dispatch_queue_t queue);
  */
 void ah_throttle_queue_set_mutability(dispatch_queue_t queue, ah_throttle_mutability_t mutability);
 
-
 /*!
  *  Returns the given queue's throttle time mutability behavior type.
  *
@@ -144,7 +143,6 @@ void ah_throttle_queue_set_mutability(dispatch_queue_t queue, ah_throttle_mutabi
  */
 ah_throttle_mutability_t ah_throttle_queue_get_mutability(dispatch_queue_t queue);
 
-
 /*!
  *  Returns the throttle monitor type for this queue.
  *
@@ -153,7 +151,6 @@ ah_throttle_mutability_t ah_throttle_queue_get_mutability(dispatch_queue_t queue
  *  @return a ah_throttle_monitor_t indicating serial or concurrent throttle monitoring
  */
 ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue);
-
 
 /*!
  *  Returns The number of throttled blocks currently in the queue.
@@ -165,6 +162,15 @@ ah_throttle_monitor_t ah_throttle_queue_get_monitor(dispatch_queue_t queue);
  *  @return An int containing the number of throttled blocks currently in the queue.
  */
 int ah_throttle_queue_get_size(dispatch_queue_t queue);
+
+/**
+ *  Returns whether the queue is actively processing queued blocks.
+ *
+ *  @param queue The queue to act as the receiver for this call.
+ *
+ *  @return a bool with true indicating the the queue is active and false indicating that the queue is idle.
+ */
+bool ah_throttle_queue_is_active(dispatch_queue_t queue);
 
 
 #pragma mark - Working with Event Callback Handlers
