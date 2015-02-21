@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
 		:git => 'https://github.com/rayascott/AHDispatch.git',
 		:tag => s.version.to_s
 	}
-	s.source_files = '*.{h,m}'
+	s.source_files = 'AHDispatch/*.{h,m}'
     s.requires_arc = true
 	s.ios.deployment_target = '6.0'
   	s.osx.deployment_target = '10.8'
